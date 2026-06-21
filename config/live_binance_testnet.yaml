@@ -1,0 +1,48 @@
+# Chronos Trading Engine — Binance Futures Testnet Configuration
+# Live market data only (no real orders)
+
+engine:
+  initial_capital: 100000.0
+
+strategies:
+  - name: GridStrategy
+    enabled: true
+    parameters:
+      grid_low: 63000.0
+      grid_high: 66000.0
+      grid_levels: 4
+      quantity: 0.01
+      symbol_ids: [1]
+
+exchanges:
+  - name: binance_testnet
+    websocket_url: "wss://stream.binancefuture.com/ws"
+    rest_url: "https://testnet.binancefuture.com"
+    user_stream_url: "wss://stream.binancefuture.com/ws"
+    api_key: "${BINANCE_API_KEY}"
+    api_secret: "${BINANCE_API_SECRET}"
+    symbols: ["btcusdt"]
+    proxy_host: ""
+    proxy_port: 0
+    heartbeat_interval_ms: 30000
+    reconnect_interval_ms: 5000
+    timeout_ms: 10000
+
+risk:
+  max_order_value: 100000.0
+  max_position_value: 500000.0
+  max_orders_per_second: 100
+  max_total_position_value: 1000000.0
+  min_available_capital: 10000.0
+  max_drawdown_percent: 20.0
+
+log:
+  output_dir: "./logs"
+  buffer_size: 65536
+  flush_interval_ms: 100
+  retention_days: 30
+
+zmq:
+  publish_endpoint: "tcp://*:5555"
+  high_water_mark: 10000
+  linger_ms: 1000

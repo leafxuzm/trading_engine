@@ -31,6 +31,14 @@ target_link_libraries(trading_engine PRIVATE
 
 target_compile_features(trading_engine PRIVATE cxx_std_20)
 
+# ── Demo log generator tool ───────────────────────────────────────
+add_executable(generate_demo_logs
+    tools/generate_demo_logs.cpp
+)
+
+target_link_libraries(generate_demo_logs PRIVATE chronos)
+target_compile_features(generate_demo_logs PRIVATE cxx_std_20)
+
 # ── Configuration summary ────────────────────────────────────────
 message(STATUS "")
 message(STATUS "trading_engine Configuration Summary:")

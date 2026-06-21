@@ -416,10 +416,29 @@ int runLive(const AppConfig& cfg) {
     md_gateway.start();
 
     // Bridge thread: market data queue → engine
+    std::atomic<uint64_t> last_tick_ts{0};
+    std::atomic<double>   last_tick_price{0};
+    std::atomic<double>   last_tick_qty{0};
+    std::atomic<int>      last_tick_side{0};
+    std::atomic<uint32_t> last_tick_count{0};
+
     std::thread md_bridge([&] {
         while (g_running.load(std::memory_order_acquire)) {
             Tick tick;
             while (md_queue->try_pop(tick)) {
+                // Print every 50th tick with full details
+                auto cnt = ++last_tick_count;
+                if (cnt % 50 == 0) {
+                    std::printf("  [tick#%u] price=%.2f qty=%.4f side=%s sym=%u\n",
+                                cnt, toDouble(tick.price), toDouble(tick.quantity),
+                                tick.side == TickSide::BID ? "BID" : "ASK",
+                                tick.symbol_id);
+                }
+                last_tick_price.store(toDouble(tick.price), std::memory_order_relaxed);
+                last_tick_qty.store(toDouble(tick.quantity), std::memory_order_relaxed);
+                last_tick_side.store(static_cast<int>(tick.side), std::memory_order_relaxed);
+                last_tick_ts.store(tick.exchange_timestamp_us, std::memory_order_relaxed);
+
                 engine.pushTick(tick);
                 zmqBridge.publishTick(tick);
                 if (logWriter.isRunning()) logWriter.writeTick(tick);
@@ -430,6 +449,12 @@ int runLive(const AppConfig& cfg) {
 
     while (g_running.load(std::memory_order_acquire)) {
         std::this_thread::sleep_for(std::chrono::seconds(2));
+        auto p = last_tick_price.load(std::memory_order_relaxed);
+        if (p > 0) {
+            std::printf("  [latest] price=%.2f qty=%.4f side=%s\n",
+                        p, last_tick_qty.load(std::memory_order_relaxed),
+                        last_tick_side.load(std::memory_order_relaxed) == 0 ? "BID" : "ASK");
+        }
         printStatsPeriodic(engine.getStats(), gateway->getStats());
     }
 
