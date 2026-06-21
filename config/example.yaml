@@ -1,0 +1,42 @@
+# Chronos Trading Engine — Example Configuration
+# Usage: trading_engine --config=config/example.yaml [--replay <dir> | --live]
+
+engine:
+  initial_capital: 100000.0
+
+strategies:
+  - name: GridStrategy
+    enabled: true
+    parameters:
+      grid_low: 95.0
+      grid_high: 105.0
+      grid_levels: 5
+      quantity: 0.1
+      symbol_ids: [1]
+
+exchanges:
+  - name: binance
+    websocket_url: "wss://testnet.binance.vision/ws"
+    rest_url: "https://testnet.binance.vision"
+    user_stream_url: "wss://stream.binancefuture.com/ws"
+    api_key: "${BINANCE_API_KEY}"
+    api_secret: "${BINANCE_API_SECRET}"
+    symbols: ["btcusdt", "ethusdt"]
+    proxy_host: "127.0.0.1"
+    proxy_port: 7890
+
+risk:
+  max_order_value: 100000.0
+  max_position_value: 500000.0
+  max_orders_per_second: 100
+  max_total_position_value: 1000000.0
+  min_available_capital: 10000.0
+  max_drawdown_percent: 20.0
+
+log:
+  output_dir: "./logs"
+
+zmq:
+  publish_endpoint: "tcp://*:5555"
+  high_water_mark: 10000
+  linger_ms: 1000
