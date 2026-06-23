@@ -41,24 +41,24 @@ flowchart LR
     classDef gateway fill:#fce4ec,stroke:#c62828,color:#b71c1c
     classDef output fill:#f5f5f5,stroke:#757575,color:#424242
 
-    subgraph Input["📥 Input"]
-        MD[🌐 Market Data<br/>WebSocket]
-        LOG[📂 Binary Log<br/>Files]
+    subgraph Input["Input"]
+        MD[Market Data<br/>WebSocket]
+        LOG[Binary Log<br/>Files]
     end
 
-    subgraph Core["⚙️ Core Process — single-process, multi-threaded"]
+    subgraph Core["Core Process — single-process, multi-threaded"]
         direction TB
-        Q1[["🔁 MPMC Queue<br/>65,536 slots"]]
-        SE["🧠 Strategy Engine<br/>poll loop · busy-spin + CPU affinity"]
-        OB["📊 OrderBook V2<br/>hot/cold separation<br/>&lt;10ns read"]
-        RE["🛡️ Risk Engine<br/>5 checks<br/>&lt;1μs"]
-        Q2[["🔁 MPMC Queue<br/>65,536 slots"]]
-        OG["📤 Order Gateway<br/>REST + User Stream<br/>pending order tracking"]
+        Q1[["MPMC Queue<br/>65,536 slots"]]
+        SE["Strategy Engine<br/>poll loop · busy-spin + CPU affinity"]
+        OB["OrderBook V2<br/>hot/cold separation<br/>&lt;10ns read"]
+        RE["Risk Engine<br/>5 checks<br/>&lt;1μs"]
+        Q2[["MPMC Queue<br/>65,536 slots"]]
+        OG["Order Gateway<br/>REST + User Stream<br/>pending order tracking"]
     end
 
-    subgraph Output["📤 Output"]
-        ZMQ["📡 ZMQ PUB-SUB"]
-        LOGOUT["💾 Binary Log Writer"]
+    subgraph Output["Output"]
+        ZMQ["ZMQ PUB-SUB"]
+        LOGOUT["Binary Log Writer"]
     end
 
     MD --> Q1
@@ -98,11 +98,11 @@ flowchart TB
     classDef l3 fill:#fff3e0,stroke:#ef6c00,color:#e65100
     classDef l4 fill:#fce4ec,stroke:#c62828,color:#b71c1c
 
-    L0["🟢 <b>core/</b><br/>types · config · Decimal"]
-    L1["🔵 <b>io/</b><br/>transport · protocol · security<br/><i>transport-agnostic</i>"]
-    L2["🟣 <b>market_data/</b> + <b>execution/</b> + <b>trading/</b> + <b>risk/</b><br/>orderbook · gateway · strategy engine · risk engine"]
-    L3["🟠 <b>strategies/</b><br/>GridStrategy · …"]
-    L4["🩷 <b>logging/</b> + <b>backtest/</b><br/>log writer · ZMQ bridge · backtest engine"]
+    L0["<b>core/</b><br/>types · config · Decimal"]
+    L1["<b>io/</b><br/>transport · protocol · security<br/><i>transport-agnostic</i>"]
+    L2["<b>market_data/</b> + <b>execution/</b> + <b>trading/</b> + <b>risk/</b><br/>orderbook · gateway · strategy engine · risk engine"]
+    L3["<b>strategies/</b><br/>GridStrategy · …"]
+    L4["<b>logging/</b> + <b>backtest/</b><br/>log writer · ZMQ bridge · backtest engine"]
 
     L0 --> L1
     L1 --> L2
@@ -130,16 +130,16 @@ flowchart TB
 
 | Component | Operation | Measured | vs Target |
 |:----------|:----------|:--------:|:---------:|
-| MPMC Queue | push / pop | <50ns | 🟢 |
-| OrderBook V2 | best bid/ask (hot) | <10ns | 🟢 |
-| OrderBook V2 | top 5 levels (hot) | <10ns | 🟢 |
-| OrderBook V2 | full 20 levels (cold) | <50ns | 🟢 |
-| OrderBook V2 | update | <100ns | 🟢 |
-| OrderIDGenerator | `nextID()` | <10ns | 🟢 |
-| RiskEngine | `checkOrder()` | <1μs | 🟢 |
-| StrategyEngine | `onTick()` dispatch | ~3μs | 🟢 |
-| **End-to-end** | **tick → strategy decision** | **13.8μs** | 🟢 3.6× below budget |
-| **System throughput** | **tick processing** | **>2.6M/s** | 🟢 2.6× above target |
+| MPMC Queue | push / pop | <50ns | |
+| OrderBook V2 | best bid/ask (hot) | <10ns | |
+| OrderBook V2 | top 5 levels (hot) | <10ns | |
+| OrderBook V2 | full 20 levels (cold) | <50ns | |
+| OrderBook V2 | update | <100ns | |
+| OrderIDGenerator | `nextID()` | <10ns | |
+| RiskEngine | `checkOrder()` | <1μs | |
+| StrategyEngine | `onTick()` dispatch | ~3μs | |
+| **End-to-end** | **tick → strategy decision** | **13.8μs** | 3.6× below budget |
+| **System throughput** | **tick processing** | **>2.6M/s** | 2.6× above target |
 
 <br>
 
@@ -184,11 +184,11 @@ flowchart TB
 <td bgcolor="#1c2128">Atomic 64-bit version counter. Reader retries if version changed during read. Zero writer-blocking.</td>
 </tr>
 <tr>
-<td bgcolor="#0c2d48"><b>🔁 Double Buffering</b> <sub>(RCU-style)</sub></td>
+<td bgcolor="#0c2d48"><b>Double Buffering</b> <sub>(RCU-style)</sub></td>
 <td bgcolor="#0c2d48">Two data copies; writer updates the dark buffer, then atomic pointer swap makes it visible. No reader locks.</td>
 </tr>
 <tr>
-<td bgcolor="#1c2128"><b>⚙️ Busy-Spin + CPU Affinity</b></td>
+<td bgcolor="#1c2128"><b>Busy-Spin + CPU Affinity</b></td>
 <td bgcolor="#1c2128">Engine and Gateway threads replace <code>yield()</code> with <code>cpuRelax()</code> (inline <code>PAUSE</code>/<code>YIELD</code> instruction). Pinned to dedicated cores via <code>pthread_setaffinity_np</code> / Mach thread affinity to prevent cache migration.</td>
 </tr>
 <tr>
@@ -196,7 +196,7 @@ flowchart TB
 <td bgcolor="#0c2d48">All financial values use <code>Decimal</code> = <code>fpm::fixed&lt;int64_t, __int128, 32&gt;</code> (64-bit, 32 fractional bits). No floating-point rounding errors.</td>
 </tr>
 <tr>
-<td bgcolor="#1c2128"><b>📡 Process Isolation via ZMQ</b></td>
+<td bgcolor="#1c2128"><b>Process Isolation via ZMQ</b></td>
 <td bgcolor="#1c2128">Latency-critical core in one process; I/O-heavy logging/backtest in separate processes connected by ZMQ PUB-SUB.</td>
 </tr>
 </table>
@@ -244,7 +244,7 @@ export BINANCE_API_SECRET="your_testnet_api_secret"
 ./trading_engine --config=../config/example.yaml --live --exchange=binance
 ```
 
-### ⚙️ Configuration
+### Configuration
 
 <div class="callout" style="background:#1c2128;border-left:4px solid #bc8cff;padding:0.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0;">
 
@@ -291,9 +291,9 @@ risk:
 
 | Repository | Visibility | Purpose |
 |:-----------|:----------:|:--------|
-| [libchronos-deps](https://github.com/leafxuzm/libchronos-deps) | 🔓 Public | Third-party dependency aggregation (FetchContent) |
-| [libchronos](https://github.com/leafxuzm/libchronos) | 🔓 Public | Core library (`libchronos.a`) — all algorithm implementations |
-| [**trading_engine**](https://github.com/leafxuzm/trading_engine) | 🔓 Public | **Application demo — pipeline orchestration** |
+| [libchronos-deps](https://github.com/leafxuzm/libchronos-deps) | Public | Third-party dependency aggregation (FetchContent) |
+| [libchronos](https://github.com/leafxuzm/libchronos) | Public | Core library (`libchronos.a`) — all algorithm implementations |
+| [**trading_engine**](https://github.com/leafxuzm/trading_engine) | Public | **Application demo — pipeline orchestration** |
 
 </p>
 
