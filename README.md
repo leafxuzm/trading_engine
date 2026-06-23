@@ -92,11 +92,11 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    classDef l0 fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
-    classDef l1 fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
-    classDef l2 fill:#ede7f6,stroke:#5e35b1,color:#311b92
-    classDef l3 fill:#fff3e0,stroke:#ef6c00,color:#e65100
-    classDef l4 fill:#fce4ec,stroke:#c62828,color:#b71c1c
+    classDef l0 fill:#e8f5e9,stroke:none,color:#1b5e20
+    classDef l1 fill:#e3f2fd,stroke:none,color:#0d47a1
+    classDef l2 fill:#ede7f6,stroke:none,color:#311b92
+    classDef l3 fill:#fff3e0,stroke:none,color:#e65100
+    classDef l4 fill:#fce4ec,stroke:none,color:#b71c1c
 
     L0["<b>core/</b><br/>types · config · Decimal"]
     L1["<b>io/</b><br/>transport · protocol · security<br/><i>transport-agnostic</i>"]
