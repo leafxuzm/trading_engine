@@ -11,10 +11,26 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -mtune=native")
 
 # ── Dependencies ─────────────────────────────────────────────────
-# libchronos already pulls in libchronos-deps via its own add_subdirectory.
-# Only include libchronos directly to avoid binary-directory conflicts.
-add_subdirectory(${CMAKE_SOURCE_DIR}/../libchronos
-                 ${CMAKE_BINARY_DIR}/libchronos)
+# libchronos-deps provides: fpm, yaml-cpp, gflags, spdlog, nlohmann_json,
+# simdjson, Boost, OpenSSL, libzmq — all via FetchContent.
+# It is a PUBLIC repo; anyone can clone it.
+if(EXISTS "${CMAKE_SOURCE_DIR}/../libchronos-deps/CMakeLists.txt")
+    add_subdirectory("${CMAKE_SOURCE_DIR}/../libchronos-deps"
+                     "${CMAKE_BINARY_DIR}/chronos_deps")
+else()
+    message(FATAL_ERROR
+        "libchronos-deps not found at ../libchronos-deps.\n"
+        "Clone it first:\n"
+        "  git clone https://github.com/leafxuzm/libchronos-deps.git")
+endif()
+
+# ── libchronos — headers bundled, library auto-downloaded ─────────
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(FindChronos)
+
+if(NOT CHRONOS_FOUND)
+    message(FATAL_ERROR "libchronos not found — see cmake/FindChronos.cmake")
+endif()
 
 # ── Trading engine executable ────────────────────────────────────
 add_executable(trading_engine
@@ -42,7 +58,13 @@ target_compile_features(generate_demo_logs PRIVATE cxx_std_20)
 # ── Configuration summary ────────────────────────────────────────
 message(STATUS "")
 message(STATUS "trading_engine Configuration Summary:")
-message(STATUS "  Version:      ${PROJECT_VERSION}")
-message(STATUS "  Build type:   ${CMAKE_BUILD_TYPE}")
-message(STATUS "  C++ standard: C++${CMAKE_CXX_STANDARD}")
+message(STATUS "  Version:        ${PROJECT_VERSION}")
+message(STATUS "  Build type:     ${CMAKE_BUILD_TYPE}")
+message(STATUS "  C++ standard:   C++${CMAKE_CXX_STANDARD}")
+if(CHRONOS_BUILT_FROM_SOURCE)
+    message(STATUS "  libchronos:     built from source (dev mode)")
+else()
+    message(STATUS "  libchronos:     pre-built ${CHRONOS_LIBRARY}")
+endif()
+message(STATUS "  Headers:        ${CHRONOS_INCLUDE_DIR}")
 message(STATUS "")

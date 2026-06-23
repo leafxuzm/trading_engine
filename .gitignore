@@ -1,4 +1,6 @@
 build/
+build_*/
 cmake-build-*/
+lib/
 .DS_Store
 logs/
