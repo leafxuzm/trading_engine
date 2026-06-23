@@ -33,22 +33,30 @@
 
 ```mermaid
 flowchart LR
-    subgraph Input
+    classDef input fill:#0c2d48,stroke:#58a6ff,color:#c9d1d9
+    classDef queue fill:#1c2128,stroke:#bc8cff,color:#c9d1d9
+    classDef engine fill:#0d3323,stroke:#3fb950,color:#c9d1d9
+    classDef book fill:#1b1b2f,stroke:#58a6ff,color:#c9d1d9
+    classDef risk fill:#2d1f0c,stroke:#d2991d,color:#c9d1d9
+    classDef gateway fill:#2d0c2d,stroke:#f778ba,color:#c9d1d9
+    classDef output fill:#1c2128,stroke:#8b949e,color:#c9d1d9
+
+    subgraph Input["📥 Input"]
         MD[🌐 Market Data<br/>WebSocket]
         LOG[📂 Binary Log<br/>Files]
     end
 
-    subgraph Core["<b>Core Process</b><br/>single-process, multi-threaded"]
+    subgraph Core["⚙️ Core Process — single-process, multi-threaded"]
         direction TB
         Q1[["🔁 MPMC Queue<br/>65,536 slots"]]
         SE["🧠 Strategy Engine<br/>poll loop · busy-spin + CPU affinity"]
-        OB["📊 OrderBook V2<br/>hot/cold separation<br/><10ns read"]
-        RE["🛡️ Risk Engine<br/>5 checks<br/><1μs"]
+        OB["📊 OrderBook V2<br/>hot/cold separation<br/>&lt;10ns read"]
+        RE["🛡️ Risk Engine<br/>5 checks<br/>&lt;1μs"]
         Q2[["🔁 MPMC Queue<br/>65,536 slots"]]
         OG["📤 Order Gateway<br/>REST + User Stream<br/>pending order tracking"]
     end
 
-    subgraph Output
+    subgraph Output["📤 Output"]
         ZMQ["📡 ZMQ PUB-SUB"]
         LOGOUT["💾 Binary Log Writer"]
     end
@@ -60,10 +68,18 @@ flowchart LR
     SE --> RE
     RE --> Q2
     Q2 --> OG
-    OG -->|"FillCallback"| SE
+    OG -->|"Fill"| SE
     OG --> ZMQ
     SE --> ZMQ
     SE --> LOGOUT
+
+    class MD,LOG input
+    class Q1,Q2 queue
+    class SE engine
+    class OB book
+    class RE risk
+    class OG gateway
+    class ZMQ,LOGOUT output
 ```
 
 <div class="callout" style="background:#0d3323;border-left:4px solid #3fb950;padding:0.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0;">
@@ -74,16 +90,30 @@ flowchart LR
 
 ### Dependency Layering
 
-```
-   core/  (types, config, Decimal)
-     ↓
-   io/   (transport, protocol, security)  ← transport-agnostic design
-     ↓
-   market_data/ + execution/ + trading/ + risk/
-     ↓
-   strategies/  ← GridStrategy, etc.
-     ↓
-   logging/ + backtest/
+```mermaid
+flowchart TB
+    classDef l0 fill:#0d3323,stroke:#3fb950,color:#c9d1d9
+    classDef l1 fill:#0c2d48,stroke:#58a6ff,color:#c9d1d9
+    classDef l2 fill:#1b1b2f,stroke:#bc8cff,color:#c9d1d9
+    classDef l3 fill:#2d1f0c,stroke:#d2991d,color:#c9d1d9
+    classDef l4 fill:#2d0c2d,stroke:#f778ba,color:#c9d1d9
+
+    L0["🟢 <b>core/</b><br/>types · config · Decimal"]
+    L1["🔵 <b>io/</b><br/>transport · protocol · security<br/><i>transport-agnostic</i>"]
+    L2["🟣 <b>market_data/</b> + <b>execution/</b> + <b>trading/</b> + <b>risk/</b><br/>orderbook · gateway · strategy engine · risk engine"]
+    L3["🟠 <b>strategies/</b><br/>GridStrategy · …"]
+    L4["🩷 <b>logging/</b> + <b>backtest/</b><br/>log writer · ZMQ bridge · backtest engine"]
+
+    L0 --> L1
+    L1 --> L2
+    L2 --> L3
+    L3 --> L4
+
+    class L0 l0
+    class L1 l1
+    class L2 l2
+    class L3 l3
+    class L4 l4
 ```
 
 <div class="callout" style="background:#0c2d48;border-left:4px solid #58a6ff;padding:0.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0;">
