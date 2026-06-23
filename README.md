@@ -33,13 +33,13 @@
 
 ```mermaid
 flowchart LR
-    classDef input fill:#0c2d48,stroke:#58a6ff,color:#c9d1d9
-    classDef queue fill:#1c2128,stroke:#bc8cff,color:#c9d1d9
-    classDef engine fill:#0d3323,stroke:#3fb950,color:#c9d1d9
-    classDef book fill:#1b1b2f,stroke:#58a6ff,color:#c9d1d9
-    classDef risk fill:#2d1f0c,stroke:#d2991d,color:#c9d1d9
-    classDef gateway fill:#2d0c2d,stroke:#f778ba,color:#c9d1d9
-    classDef output fill:#1c2128,stroke:#8b949e,color:#c9d1d9
+    classDef input fill:#e0f7fa,stroke:#00838f,color:#004d40
+    classDef queue fill:#ede7f6,stroke:#5e35b1,color:#311b92
+    classDef engine fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef book fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+    classDef risk fill:#fff8e1,stroke:#f9a825,color:#e65100
+    classDef gateway fill:#fce4ec,stroke:#c62828,color:#b71c1c
+    classDef output fill:#f5f5f5,stroke:#757575,color:#424242
 
     subgraph Input["📥 Input"]
         MD[🌐 Market Data<br/>WebSocket]
@@ -92,11 +92,11 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    classDef l0 fill:#0d3323,stroke:#3fb950,color:#c9d1d9
-    classDef l1 fill:#0c2d48,stroke:#58a6ff,color:#c9d1d9
-    classDef l2 fill:#1b1b2f,stroke:#bc8cff,color:#c9d1d9
-    classDef l3 fill:#2d1f0c,stroke:#d2991d,color:#c9d1d9
-    classDef l4 fill:#2d0c2d,stroke:#f778ba,color:#c9d1d9
+    classDef l0 fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef l1 fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+    classDef l2 fill:#ede7f6,stroke:#5e35b1,color:#311b92
+    classDef l3 fill:#fff3e0,stroke:#ef6c00,color:#e65100
+    classDef l4 fill:#fce4ec,stroke:#c62828,color:#b71c1c
 
     L0["🟢 <b>core/</b><br/>types · config · Decimal"]
     L1["🔵 <b>io/</b><br/>transport · protocol · security<br/><i>transport-agnostic</i>"]
