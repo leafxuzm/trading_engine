@@ -106,6 +106,11 @@ if(NOT TARGET chronos)
         IMPORTED_LOCATION "${CHRONOS_LIBRARY}"
         INTERFACE_INCLUDE_DIRECTORIES "${CHRONOS_INCLUDE_DIR}"
     )
+    # Propagate IO-layer availability (libchronos always builds with IO when
+    # Boost + OpenSSL are available; the release .a is built with both).
+    set_target_properties(chronos PROPERTIES
+        INTERFACE_COMPILE_DEFINITIONS CHRONOS_HAS_LIVE_MODE
+    )
     # Link libchronos-deps so consumers get third-party headers + libraries
     target_link_libraries(chronos INTERFACE chronos_deps)
 endif()
